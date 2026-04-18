@@ -3,6 +3,8 @@ module gogetgmail
 go 1.25.6
 
 require (
+	github.com/joho/godotenv v1.5.1
+	github.com/sashabaranov/go-openai v1.41.2
 	golang.org/x/oauth2 v0.36.0
 	google.golang.org/api v0.276.0
 )

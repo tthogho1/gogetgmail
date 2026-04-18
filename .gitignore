@@ -1,6 +1,7 @@
 # Local credentials and tokens
 credentials.json
 token.json
+.env
 
 # OS and editor files
 .DS_Store

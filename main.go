@@ -7,15 +7,24 @@ import (
 	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
+	openai "github.com/sashabaranov/go-openai"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
 	"google.golang.org/api/option"
 
+	"gogetgmail/companyai"
 	"gogetgmail/mail"
 	"gogetgmail/token"
 )
 
 func main() {
+	// Load .env for OPENAI_API_KEY
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Warning: .env file not found: %v", err)
+	}
+	aiClient := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+
 	labelName := "INBOX"
 	if len(os.Args) > 1 {
 		labelName = os.Args[1]
@@ -67,6 +76,9 @@ func main() {
 	if len(allMessages) < limit {
 		limit = len(allMessages)
 	}
+
+	var companies []string
+
 	for i, m := range allMessages[:limit] {
 		msg, err := srv.Users.Messages.Get("me", m.Id).Format("full").Do()
 		if err != nil {
@@ -87,7 +99,21 @@ func main() {
 				preview = preview[:200] + "..."
 			}
 			fmt.Printf("Body:    %s\n", preview)
+
+			// Extract company name via OpenAI
+			company, err := companyai.GetCompanyName(context.Background(), aiClient, body)
+			if err != nil {
+				log.Printf("Company extraction failed: %v", err)
+			} else {
+				companies = append(companies, company)
+			}
 		}
 		fmt.Println()
+	}
+
+	// Print all extracted company names
+	fmt.Println("=== Extracted Companies ===")
+	for i, c := range companies {
+		fmt.Printf("  %d. %s\n", i+1, c)
 	}
 }
