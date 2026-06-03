@@ -6,3 +6,6 @@ token.json
 # OS and editor files
 .DS_Store
 *.swp
+
+# AI assistant context
+CLAUDE.md
